@@ -138,12 +138,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
-        await db.Database.MigrateAsync();
+        await db.Database.EnsureCreatedAsync();
     }
     catch (Exception ex)
     {
         var log = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        log.LogWarning(ex, "Database migration failed — database may not be available yet");
+        log.LogWarning(ex, "Database schema creation failed — database may not be available yet");
     }
 }
 
