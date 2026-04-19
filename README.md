@@ -56,9 +56,9 @@ open http://localhost:3000
 
 | Variable | Description | Default |
 |---|---|---|
-| `POSTGRES_PASSWORD` | PostgreSQL password | `changeme` |
-| `JWT_SECRET` | JWT signing secret (≥32 chars) | — |
-| `ENCRYPTION_KEY` | AES-256 key as 64-char hex string | — |
+| `POSTGRES_PASSWORD` | PostgreSQL password | `studienplaner_local_dev_pw` |
+| `JWT_SECRET` | JWT signing secret (≥32 chars) | `dev-secret-change-this-to-something-long-and-secure-32chars` |
+| `ENCRYPTION_KEY` | AES-256 key as 64-char hex string | `0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef` |
 | `REDIS_CONNECTION` | Redis connection string | `redis:6379` |
 | `CORS_ALLOWED_ORIGINS` | Allowed frontend origins (comma-separated) | `http://localhost:3000` |
 
