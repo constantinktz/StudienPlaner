@@ -193,7 +193,7 @@ public class ScheduleService(
 
         foreach (var evt in schedule.Events)
         {
-            var daysOffset = (int)evt.DayOfWeek == 0 ? 6 : (int)evt.DayOfWeek - 1;
+            var daysOffset = GetDayOffsetFromMonday(evt.DayOfWeek);
             var date = weekStart.AddDays(daysOffset).ToDateTime(TimeOnly.MinValue);
             var dtStart = date.Add(evt.StartTime.ToTimeSpan());
             var dtEnd = date.Add(evt.EndTime.ToTimeSpan());
@@ -222,6 +222,13 @@ public class ScheduleService(
 
     private static string EscapeIcal(string value) =>
         value.Replace("\\", "\\\\").Replace(",", "\\,").Replace(";", "\\;").Replace("\n", "\\n");
+
+    /// <summary>
+    /// Returns the number of days from Monday (0) to the given day.
+    /// Sunday (DayOfWeek=0) maps to offset 6 (end of the ISO week).
+    /// </summary>
+    private static int GetDayOffsetFromMonday(DayOfWeek day) =>
+        day == DayOfWeek.Sunday ? 6 : (int)day - 1;
 
     private static List<CourseOfStudyDto> GetFallbackCourses() =>
     [

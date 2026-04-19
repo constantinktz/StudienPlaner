@@ -6,6 +6,8 @@ namespace StudienPlaner.Services.Planner;
 /// <summary>Generates study plan recommendations based on module status and schedule.</summary>
 public class RecommendationEngine(ILogger<RecommendationEngine> logger)
 {
+    private const int MaxRecommendedEcts = 36;
+    private const int MinRecommendedEcts = 18;
     /// <summary>Generates recommendations for a student based on their modules and current schedule.</summary>
     public List<RecommendationEntity> GenerateRecommendations(
         List<ModuleDto> allModules,
@@ -96,27 +98,27 @@ public class RecommendationEngine(ILogger<RecommendationEngine> logger)
             .Where(m => m.Status == ModuleStatus.Enrolled || m.Status == ModuleStatus.Planned)
             .Sum(m => m.Credits);
 
-        if (enrolledCredits > 36)
+        if (enrolledCredits > MaxRecommendedEcts)
         {
             recommendations.Add(new RecommendationEntity
             {
                 UserId = userId,
                 Type = RecommendationType.OverloadWarning,
                 Message = $"Your current semester load is {enrolledCredits} ECTS, which exceeds the recommended " +
-                          "maximum of 36. Consider removing some modules to avoid burnout.",
+                          $"maximum of {MaxRecommendedEcts}. Consider removing some modules to avoid burnout.",
                 Priority = 1
             });
         }
 
         // Rule 6 – UnderloadWarning
-        if (enrolledCredits < 18 && enrolledCredits > 0)
+        if (enrolledCredits < MinRecommendedEcts && enrolledCredits > 0)
         {
             recommendations.Add(new RecommendationEntity
             {
                 UserId = userId,
                 Type = RecommendationType.UnderloadWarning,
                 Message = $"Your current semester load is only {enrolledCredits} ECTS. " +
-                          "Consider enrolling in more modules to stay on track for graduation.",
+                          $"Consider enrolling in more modules to stay on track for graduation.",
                 Priority = 1
             });
         }

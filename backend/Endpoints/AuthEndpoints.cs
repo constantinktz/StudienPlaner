@@ -42,22 +42,24 @@ public static class AuthEndpoints
     private static async Task<IResult> RegisterAsync(
         [FromBody] RegisterRequest request,
         [FromServices] AuthService authService,
+        [FromServices] IHostEnvironment env,
         HttpContext ctx,
         CancellationToken ct)
     {
         var (user, accessToken, refreshToken) = await authService.RegisterAsync(request, ct);
-        SetAuthCookies(ctx, accessToken, refreshToken);
+        SetAuthCookies(ctx, accessToken, refreshToken, env);
         return Results.Created($"/api/user/profile", new AuthResponse(user.Id, user.Email, accessToken));
     }
 
     private static async Task<IResult> LoginAsync(
         [FromBody] LoginRequest request,
         [FromServices] AuthService authService,
+        [FromServices] IHostEnvironment env,
         HttpContext ctx,
         CancellationToken ct)
     {
         var (user, accessToken, refreshToken) = await authService.LoginAsync(request, ct);
-        SetAuthCookies(ctx, accessToken, refreshToken);
+        SetAuthCookies(ctx, accessToken, refreshToken, env);
         return Results.Ok(new AuthResponse(user.Id, user.Email, accessToken));
     }
 
@@ -84,19 +86,21 @@ public static class AuthEndpoints
         return Results.NoContent();
     }
 
-    private static void SetAuthCookies(HttpContext ctx, string accessToken, string refreshToken)
+    private static void SetAuthCookies(HttpContext ctx, string accessToken, string refreshToken, IHostEnvironment env)
     {
+        // Only set Secure=true in non-development environments to allow http://localhost in dev
+        var isSecure = !env.IsDevelopment();
         ctx.Response.Cookies.Append("access_token", accessToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = isSecure,
             SameSite = SameSiteMode.Strict,
             MaxAge = TimeSpan.FromMinutes(15)
         });
         ctx.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = isSecure,
             SameSite = SameSiteMode.Strict,
             MaxAge = TimeSpan.FromDays(7)
         });
