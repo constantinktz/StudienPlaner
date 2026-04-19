@@ -8,3 +8,9 @@ export interface UserProfile {
   portalConnected: boolean;
   createdAt: string;
 }
+
+export interface AuthResponse {
+  userId: string;
+  email: string;
+  accessToken: string;
+}

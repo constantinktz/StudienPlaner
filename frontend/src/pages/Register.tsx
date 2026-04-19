@@ -10,11 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import type { UserProfile } from '@/types/auth';
+import type { AuthResponse, UserProfile } from '@/types/auth';
 
 const schema = z
   .object({
     email: z.string().email('Ungültige E-Mail-Adresse'),
+    matrikelNumber: z.string().regex(/^\d{7}$/, 'Matrikelnummer muss 7 Ziffern haben'),
     password: z.string().min(6, 'Mindestens 6 Zeichen'),
     confirmPassword: z.string().min(6, 'Mindestens 6 Zeichen'),
   })
@@ -37,11 +38,13 @@ export default function Register() {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const res = await api.post<UserProfile>('/api/auth/register', {
+      await api.post<AuthResponse>('/api/auth/register', {
         email: data.email,
         password: data.password,
+        matrikelNumber: data.matrikelNumber,
       });
-      setUser(res.data);
+      const profileRes = await api.get<UserProfile>('/api/user/profile');
+      setUser(profileRes.data);
       toast.success('Konto erstellt!');
       navigate('/onboarding');
     } catch {
@@ -65,6 +68,13 @@ export default function Register() {
               <Label htmlFor="email">E-Mail</Label>
               <Input id="email" type="email" placeholder="m@example.com" {...register('email')} />
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="matrikel">Matrikelnummer</Label>
+              <Input id="matrikel" type="text" inputMode="numeric" maxLength={7} placeholder="1234567" {...register('matrikelNumber')} />
+              {errors.matrikelNumber && (
+                <p className="mt-1 text-xs text-red-600">{errors.matrikelNumber.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="password">Passwort</Label>

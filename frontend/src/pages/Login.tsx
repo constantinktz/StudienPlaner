@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import type { UserProfile } from '@/types/auth';
+import type { AuthResponse, UserProfile } from '@/types/auth';
 
 const schema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse'),
@@ -31,8 +31,9 @@ export default function Login() {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const res = await api.post<UserProfile>('/api/auth/login', data);
-      setUser(res.data);
+      await api.post<AuthResponse>('/api/auth/login', data);
+      const profileRes = await api.get<UserProfile>('/api/user/profile');
+      setUser(profileRes.data);
       toast.success('Willkommen zurück!');
       navigate('/');
     } catch {
