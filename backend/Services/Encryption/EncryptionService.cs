@@ -25,7 +25,7 @@ public class EncryptionService
     /// <returns>A tuple of (ciphertext_base64, iv_base64).</returns>
     public (string CiphertextBase64, string IvBase64) Encrypt(string plaintext)
     {
-        var nonce = new byte[AesGcm.NonceByteSizes.MaxSize]; // 12 bytes
+        var nonce = new byte[AesGcm.NonceByteSizes.MaxSize]; // AES-GCM recommended nonce size (96 bits)
         RandomNumberGenerator.Fill(nonce);
 
         var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);

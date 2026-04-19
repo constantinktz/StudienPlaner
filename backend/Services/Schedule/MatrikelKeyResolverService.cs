@@ -45,15 +45,20 @@ public class MatrikelKeyResolverService
             }
         }
 
-        // Extract enrollment year from digits 3-4 (0-indexed positions 2-3 after letters)
+        // Each academic year has two semesters: winter (Oct–Feb) and summer (Mar–Sep).
+        // Count full semesters elapsed since enrollment start (assumed winter semester of enrollYear).
         int? estimatedSemester = null;
         var digits = new string(matrikelNumber.Where(char.IsDigit).ToArray());
         if (digits.Length >= 2 && int.TryParse(digits[..2], out var yearSuffix))
         {
             var enrollYear = yearSuffix < 50 ? 2000 + yearSuffix : 1900 + yearSuffix;
             var now = DateTime.UtcNow;
-            var semestersElapsed = (now.Year - enrollYear) * 2
-                + (now.Month >= 3 && now.Month <= 8 ? 1 : 0);
+
+            // Treat summer semester as months 3–9, winter semester as months 10–2.
+            // Count completed semesters: 2 per full year, +1 if currently in or past summer.
+            var yearsElapsed = now.Year - enrollYear;
+            var inOrPastSummer = now.Month is >= 3 and <= 9;
+            var semestersElapsed = yearsElapsed * 2 + (inOrPastSummer ? 1 : 0);
             estimatedSemester = Math.Clamp(semestersElapsed, 1, 12);
         }
 
